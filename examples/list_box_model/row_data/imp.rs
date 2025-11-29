@@ -26,15 +26,14 @@ impl ObjectSubclass for RowData {
 // corresponding values of the properties.
 impl ObjectImpl for RowData {
     fn properties() -> &'static [glib::ParamSpec] {
-        use glib::once_cell::sync::Lazy;
-        static PROPERTIES: Lazy<Vec<glib::ParamSpec>> = Lazy::new(|| {
+        use std::sync::OnceLock;
+        static PROPERTIES: OnceLock<Vec<glib::ParamSpec>> = OnceLock::new();
+        PROPERTIES.get_or_init(|| {
             vec![
                 glib::ParamSpecString::builder("name").build(),
                 glib::ParamSpecUInt::builder("count").maximum(100).build(),
             ]
-        });
-
-        PROPERTIES.as_ref()
+        })
     }
 
     fn set_property(&self, _id: usize, value: &glib::Value, pspec: &glib::ParamSpec) {

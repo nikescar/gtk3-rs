@@ -2,7 +2,7 @@
 
 use glib::subclass::prelude::*;
 use glib::translate::*;
-use glib::Cast;
+use glib::object::Cast;
 
 use super::bin::BinImpl;
 use crate::Button;

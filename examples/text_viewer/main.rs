@@ -18,7 +18,10 @@ pub fn build_ui(application: &gtk::Application) {
     let open_button: gtk::ToolButton = builder.object("open_button").expect("Couldn't get builder");
     let text_view: gtk::TextView = builder.object("text_view").expect("Couldn't get text_view");
 
-    open_button.connect_clicked(glib::clone!(@weak window => move |_| {
+    open_button.connect_clicked(glib::clone!(
+        #[weak]
+        window,
+        move |_| {
         // TODO move this to a impl?
         let file_chooser = gtk::FileChooserDialog::new(
             Some("Open File"),
@@ -29,7 +32,10 @@ pub fn build_ui(application: &gtk::Application) {
             ("Open", gtk::ResponseType::Ok),
             ("Cancel", gtk::ResponseType::Cancel),
         ]);
-        file_chooser.connect_response(glib::clone!(@weak text_view => move |file_chooser, response| {
+        file_chooser.connect_response(glib::clone!(
+            #[weak]
+            text_view,
+            move |file_chooser, response| {
             if response == gtk::ResponseType::Ok {
                 let filename = file_chooser.filename().expect("Couldn't get filename");
                 let file = File::open(filename).expect("Couldn't open file");
@@ -44,10 +50,12 @@ pub fn build_ui(application: &gtk::Application) {
                     .set_text(&contents);
             }
             file_chooser.close();
-        }));
+            }
+        ));
 
         file_chooser.show_all();
-    }));
+        }
+    ));
 
     window.show_all();
 }

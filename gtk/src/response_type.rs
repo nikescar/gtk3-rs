@@ -2,7 +2,7 @@
 
 use glib::translate::{from_glib, FromGlib, IntoGlib, ToGlibPtr, ToGlibPtrMut};
 use glib::value::{FromValue, ToValue, ValueType};
-use glib::{StaticType, Type};
+use glib::{prelude::StaticType, Type};
 use std::fmt;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

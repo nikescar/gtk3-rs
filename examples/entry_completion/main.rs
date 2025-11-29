@@ -11,9 +11,13 @@ fn main() {
     // When activated, shuts down the application
     let quit = gio::SimpleAction::new("quit", None);
     quit.connect_activate(
-        glib::clone!(@weak application => move |_action, _parameter| {
-            application.quit();
-        }),
+        glib::clone!(
+            #[weak]
+            application,
+            move |_action, _parameter| {
+                application.quit();
+            }
+        ),
     );
     application.connect_startup(|application| {
         application.set_accels_for_action("app.quit", &["<Primary>Q"]);

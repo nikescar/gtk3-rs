@@ -79,7 +79,10 @@ fn build_ui(application: &gtk::Application) {
         let delay = Duration::from_millis((100 << thread_num) - 5);
 
         // Spawn the worker thread
-        thread::spawn(glib::clone!(@strong ready_tx => move || {
+        thread::spawn(glib::clone!(
+            #[strong]
+            ready_tx,
+            move || {
             let mut n = 0;
             for mut image in rx.iter() {
                 n = (n + 1) % 0x10000;
@@ -94,7 +97,8 @@ fn build_ui(application: &gtk::Application) {
                 // Send the finished image back to the GUI thread
                 let _ = ready_tx.send_blocking((thread_num, image));
             }
-        }));
+            }
+        ));
     }
 
     // The connect-draw signal and the timeout handler closures have to be 'static, and both need
@@ -104,17 +108,23 @@ fn build_ui(application: &gtk::Application) {
     // Whenever the drawing area has to be redrawn, render the latest images in the correct
     // locations
     area.connect_draw(
-        glib::clone!(@weak workspace => @default-return glib::Propagation::Proceed, move |_, cr| {
-            let (ref images, ref origins, _) = *workspace;
+        glib::clone!(
+            #[weak]
+            workspace,
+            #[upgrade_or]
+            glib::Propagation::Proceed,
+            move |_, cr| {
+                let (ref images, ref origins, _) = *workspace;
 
-            for (image, origin) in images.iter().zip(origins.iter()) {
-                image.borrow_mut().with_surface(|surface| {
-                    draw_image_if_dirty(cr, surface, *origin, (WIDTH, HEIGHT));
-                });
+                for (image, origin) in images.iter().zip(origins.iter()) {
+                    image.borrow_mut().with_surface(|surface| {
+                        draw_image_if_dirty(cr, surface, *origin, (WIDTH, HEIGHT));
+                    });
+                }
+
+                glib::Propagation::Proceed
             }
-
-            glib::Propagation::Proceed
-        }),
+        ),
     );
 
     glib::MainContext::default().spawn_local(async move {
